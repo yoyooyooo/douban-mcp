@@ -63,13 +63,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const books = await searchBooks(validatedArgs)
       const text = json2md({
         table: {
-          headers: ['id', 'title', 'author' ,'publish_date', 'isbn'],
+          headers: ['publish_date', 'title', 'author', 'rate' ,'id', 'isbn'],
           rows: books.map(_ => ({
             id: _.id,
             title: _.title,
             author: _.author.join('、'),
             publish_date: _.pubdate,
-            isbn: _.isbn13
+            isbn: _.isbn13,
+            rate: `${_.rating?.average || '0'} (${_.rating?.numRaters || 0}人)`
           }))
         }
       })
@@ -78,7 +79,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [
           {
             type: 'text',
-            text: '```markdown\n' + text + '```'
+            text: text
           }
         ]
       }

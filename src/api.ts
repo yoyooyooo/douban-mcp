@@ -1,3 +1,5 @@
+import dayjs from "dayjs"
+
 export enum TOOL {
   SEARCH = 'search'
 }
@@ -30,7 +32,7 @@ async function searchByKeyword (q: string) {
     headers: FAKE_HEADERS
   })).json()
 
-  return res?.books || []
+  return res?.books ? res.books.map(parseDoubanBook) : []
 }
 
 async function searchByISBN (isbn: string) {
@@ -39,7 +41,7 @@ async function searchByISBN (isbn: string) {
   const res: RawDoubanBook = await (await fetch(url.toString(), {
     headers: FAKE_HEADERS
   })).json()
-  return res?.id ? [res] : []
+  return res?.id ? [parseDoubanBook(res)] : []
 }
 
 interface RawDoubanBook {
@@ -103,4 +105,17 @@ const FAKE_HEADERS = {
     'Sec-Fetch-User': '?1',
     'Upgrade-Insecure-Requests': '1',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0'
+}
+
+const parseDoubanBook = (_: RawDoubanBook): RawDoubanBook => {
+
+  let pubdate = _.pubdate?.replace?.(/年|月/g, '-')?.replace?.(/日$/, '') || ''
+  if (pubdate) {
+    pubdate = dayjs(pubdate).format('YYYY/MM')
+  }
+
+  return {
+    ..._,
+    pubdate
+  }
 }
