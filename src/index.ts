@@ -4,9 +4,12 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
+  ErrorCode,
   ListToolsRequestSchema,
+  McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { RequestPayloadSchema } from "./types.js";
+import { TOOL } from "./api.js";
 
 const server = new Server(
   {
@@ -25,21 +28,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
-        name: "fetch_html",
-        description: "Fetch a website and return the content as HTML",
+        name: TOOL.SEARCH,
+        description: "search books from douban, either by ISBN or by query",
         inputSchema: {
           type: "object",
           properties: {
-            url: {
+            q: {
               type: "string",
-              description: "URL of the website to fetch",
+              description: "Optional, The search query",
             },
-            headers: {
-              type: "object",
-              description: "Optional headers to include in the request",
+            isbn: {
+              type: "string",
+              description: "Optional, The ISBN of the book",
             },
           },
-          required: ["url"],
         },
       },
     ],
@@ -51,10 +53,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   const validatedArgs = RequestPayloadSchema.parse(args);
 
-  if (request.params.name === "fetch_html") {
-    
+  if (!validatedArgs.isbn && !validatedArgs.q) {
+    throw new Error("Either q or isbn must be provided");
   }
-  throw new Error("Tool not found");
+
+  const tool = request.params.name
+
+  if (tool === TOOL.SEARCH) {
+  }
+
+  throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${tool}`)
 });
 
 async function main() {
