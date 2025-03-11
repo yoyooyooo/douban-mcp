@@ -10,6 +10,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { RequestPayloadSchema } from "./types.js";
 import { searchBooks, TOOL } from "./api.js";
+import json2md from 'json2md'
 
 const server = new Server(
   {
@@ -60,15 +61,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     if (name === TOOL.SEARCH) {
       const books = await searchBooks(validatedArgs)
-      const text = books.reduce((acc, book, i) => {
-        return acc + `${i + 1}.《${book.title}》-${book.author.join('、')} isbn:${book.isbn13} id:${book.id}\n`
-      }, '')
+      const text = json2md({
+        table: {
+          headers: ['id', 'title', 'author' ,'publish_date', 'isbn'],
+          rows: books.map(_ => ({
+            id: _.id,
+            title: _.title,
+            author: _.author.join('、'),
+            publish_date: _.pubdate,
+            isbn: _.isbn13
+          }))
+        }
+      })
 
       return {
         content: [
           {
             type: 'text',
-            text: text
+            text: '```markdown\n' + text + '```'
           }
         ]
       }
