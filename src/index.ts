@@ -8,9 +8,10 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import { RequestPayloadSchema } from "./types.js";
+import { BrowseParamsSchema, SearchParamsSchema } from "./types.js";
 import { searchBooks, TOOL } from "./api.js";
 import json2md from 'json2md'
+import open from 'open'
 
 const server = new Server(
   {
@@ -24,7 +25,6 @@ const server = new Server(
     },
   },
 );
-
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
@@ -45,21 +45,35 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
-    ],
+      {
+        name: TOOL.BROWSE,
+        description: "open default browser and browse douban book detail",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              description: "Required, The id of douban book data",
+            }
+          },
+          required: ['id']
+        }
+      }
+    ]
   };
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  const validatedArgs = RequestPayloadSchema.parse(args);
 
-  if (!validatedArgs.isbn && !validatedArgs.q) {
-    throw new McpError(ErrorCode.InvalidParams, "Either q or isbn must be provided")
-  }
 
   try {
     if (name === TOOL.SEARCH) {
+      const validatedArgs = SearchParamsSchema.parse(args);
+      if (!validatedArgs.isbn && !validatedArgs.q) {
+        throw new McpError(ErrorCode.InvalidParams, "Either q or isbn must be provided")
+      }
       const books = await searchBooks(validatedArgs)
       const text = json2md({
         table: {
@@ -82,6 +96,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             text: text
           }
         ]
+      }
+    }
+
+    if (name === TOOL.BROWSE) {
+      const validatedArgs = BrowseParamsSchema.parse(args);
+      if (!validatedArgs.id) {
+        throw new McpError(ErrorCode.InvalidParams, "douban book id must be provided")
+      }
+
+      // Automatically open the image URL in the default browser
+      await open(`https://book.douban.com/subject/${validatedArgs.id}/`);
+
+      // Return a formatted message with the clickable link
+      return {
+        content: [
+          {
+            type: "text",
+            text: `The Douban Book Page has been opened in your default browser`,
+          },
+        ],
       }
     }
   } catch(error) {

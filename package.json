@@ -19,6 +19,7 @@
     "@types/json2md": "^1.5.4",
     "dayjs": "^1.11.13",
     "json2md": "^2.0.2",
+    "open": "^10.1.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

@@ -1,8 +1,10 @@
 import { z } from "zod";
 
-export const RequestPayloadSchema = z.object({
+export const SearchParamsSchema = z.object({
   q: z.string().optional(),
   isbn: z.string().optional()
 });
 
-export type RequestPayload = z.infer<typeof RequestPayloadSchema>;
+export const BrowseParamsSchema = z.object({
+  id: z.string()
+});

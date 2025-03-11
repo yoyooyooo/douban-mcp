@@ -1,7 +1,8 @@
 import dayjs from "dayjs"
 
 export enum TOOL {
-  SEARCH = 'search'
+  SEARCH = 'search',
+  BROWSE = 'browse'
 }
 
 const apiKey = '0ac44ae016490db2204ce0a042db2916'
