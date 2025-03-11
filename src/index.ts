@@ -9,7 +9,7 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { RequestPayloadSchema } from "./types.js";
-import { TOOL } from "./api.js";
+import { searchBooks, TOOL } from "./api.js";
 
 const server = new Server(
   {
@@ -54,15 +54,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const validatedArgs = RequestPayloadSchema.parse(args);
 
   if (!validatedArgs.isbn && !validatedArgs.q) {
-    throw new Error("Either q or isbn must be provided");
+    throw new McpError(ErrorCode.InvalidParams, "Either q or isbn must be provided")
   }
 
-  const tool = request.params.name
+  try {
+    if (name === TOOL.SEARCH) {
+      const books = await searchBooks(validatedArgs)
+      const text = books.reduce((acc, book, i) => {
+        return acc + `${i + 1}.《${book.title}》-${book.author.join('、')} isbn:${book.isbn13} id:${book.id}\n`
+      }, '')
 
-  if (tool === TOOL.SEARCH) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: text
+          }
+        ]
+      }
+    }
+  } catch(error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error: ${errorMessage}`,
+        },
+      ],
+      isError: true,
+    };
   }
 
-  throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${tool}`)
+
+  throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`)
 });
 
 async function main() {

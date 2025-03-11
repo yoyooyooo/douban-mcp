@@ -4,7 +4,20 @@ export enum TOOL {
 
 const apiKey = '0ac44ae016490db2204ce0a042db2916'
 
-export async function searchByKeyword (q: string) {
+export async function searchBooks(params: {
+  q?: string
+  isbn?: string
+}) {
+  if (params.q) {
+    return searchByKeyword(params.q)
+  }
+  if (params.isbn) {
+    return searchByISBN(params.isbn)
+  }
+  return []
+}
+
+async function searchByKeyword (q: string) {
   const url = new URL('https://api.douban.com/v2/book/search')
   url.searchParams.set('q', q)
   url.searchParams.set('apikey', apiKey)
@@ -20,7 +33,7 @@ export async function searchByKeyword (q: string) {
   return res?.books || []
 }
 
-export async function searchByISBN (isbn: string) {
+async function searchByISBN (isbn: string) {
   const url = new URL(`https://api.douban.com/v2/book/isbn/${isbn}`)
   url.searchParams.set('apikey', apiKey)
   const res: RawDoubanBook = await (await fetch(url.toString(), {

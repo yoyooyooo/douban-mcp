@@ -41,7 +41,7 @@ To integrate this server with a desktop app, add the following to your app's ser
 ```json
 {
   "mcpServers": {
-    "douban": {
+    "douban-mcp": {
       "command": "node",
       "args": [
         "{ABSOLUTE PATH TO FILE HERE}/dist/index.js"
