@@ -45,7 +45,10 @@ To integrate this server with a desktop app, add the following to your app's ser
       "command": "node",
       "args": [
         "{ABSOLUTE PATH TO FILE HERE}/dist/index.js"
-      ]
+      ],
+      "env": {
+        "COOKIE": "bid=;ck=;dbcl2=;frodotk_db=;" // get cookie value from website
+      }
     }
   }
 }

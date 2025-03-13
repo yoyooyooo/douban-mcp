@@ -103,13 +103,6 @@ const requestFrodoApi = async (url: string) => {
     _sig: getFrodoSign(fullURL, date),
   };
 
-  const cookie = [
-    `bid=kduJnqvNBFc`,
-    `ck=DWwN`,
-    `dbcl2="218395312:UT9bF9dpAxQ"`,
-    `frodotk_db="2efc076d387bf7e58cf41647a973e7af"`,
-  ].join(';')
-
   const oUrl = new URL(fullURL)
 
   for (let key in rParams) {
@@ -121,7 +114,7 @@ const requestFrodoApi = async (url: string) => {
   const req = await fetch(oUrl.toString(), {
     headers: {
       'user-agent': getUA(),
-      cookie: cookie
+      cookie: process.env.COOKIE || ''
     }
   })
 
