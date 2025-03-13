@@ -8,10 +8,11 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import { BrowseParamsSchema, SearchParamsSchema } from "./types.js";
-import { searchBooks, TOOL } from "./api.js";
+import { BrowseParamsSchema, ListGroupTopicsParamsSchema, SearchParamsSchema } from "./types.js";
+import { getGroupTopics, searchBooks, TOOL } from "./api.js";
 import json2md from 'json2md'
 import open from 'open'
+import dayjs from "dayjs";
 
 const server = new Server(
   {
@@ -58,6 +59,19 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
           required: ['id']
         }
+      },
+      {
+        name: TOOL.LIST_GROUP_TOPICS,
+        description: "list group topics",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              description: "Optional, The id of douban group, default 732764",
+            }
+          },
+        }
       }
     ]
   };
@@ -65,8 +79,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-
-
 
   try {
     if (name === TOOL.SEARCH) {
@@ -114,6 +126,32 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           {
             type: "text",
             text: `The Douban Book Page has been opened in your default browser`,
+          },
+        ],
+      }
+    }
+
+    if (name === TOOL.LIST_GROUP_TOPICS) {
+      const validatedArgs = ListGroupTopicsParamsSchema.parse(args);
+      const id = validatedArgs.id || '732764'
+      const topics = await getGroupTopics({ group_id: id })
+
+      const text = json2md({
+        table: {
+          headers: ['publish_date', 'title', 'id'],
+          rows: topics.map(_ => ({
+            id: _.id,
+            title: `${_.topic_tags.map(_ => _.name + '|').join()}${_.title}`,
+            publish_date: dayjs(_.create_time).format('YYYY/MM/DD'),
+          }))
+        }
+      })
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: text,
           },
         ],
       }

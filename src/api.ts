@@ -1,8 +1,11 @@
 import dayjs from "dayjs"
+import crypto from 'crypto'
+import { ITopic, RawDoubanBook } from "./types.js"
 
 export enum TOOL {
   SEARCH = 'search',
-  BROWSE = 'browse'
+  BROWSE = 'browse',
+  LIST_GROUP_TOPICS = 'list-group-topics'
 }
 
 const apiKey = '0ac44ae016490db2204ce0a042db2916'
@@ -45,48 +48,14 @@ async function searchByISBN (isbn: string) {
   return res?.id ? [parseDoubanBook(res)] : []
 }
 
-interface RawDoubanBook {
-  rating: {
-    max: number
-    numRaters: number
-    average: string
-    min: number
-  }
-  subtitle: string
-  author: string[]
-  pubdate: string
-  tags: {
-    count: number
-    name: string
-    title: string
-  }[]
-  origin_title: string
-  image: string
-  binding: string
-  translator: any[]
-  catalog: string
-  pages: string
-  images: {
-    small: string
-    large: string
-    medium: string
-  }
-  alt: string
-  id: string
-  publisher: string
-  isbn10: string
-  isbn13: string
-  title: string
-  url: string
-  alt_title: string
-  author_intro: string
-  summary: string
-  series: {
-    id: string
-    title: string
-  }
-  price: string
-  ebook_url: string
+export async function getGroupTopics(params: {
+  group_id: string
+}) {
+  const res = await requestFrodoApi(`/group/${params.group_id}/topics`)
+
+  const topics = (res.topics as ITopic[] || []).filter(_ => !_.is_ad)
+
+  return topics
 }
 
 const FAKE_HEADERS = {
@@ -120,3 +89,63 @@ const parseDoubanBook = (_: RawDoubanBook): RawDoubanBook => {
     pubdate
   }
 }
+
+const requestFrodoApi = async (url: string) => {
+  const fullURL = 'https://frodo.douban.com/api/v2' + url;
+  const date = dayjs().format('YYYYMMDD')
+
+  const rParams = {
+    os_rom: 'android',
+    apiKey: '0dad551ec0f84ed02907ff5c42e8ec70',
+    _ts: date,
+    _sig: getFrodoSign(fullURL, date),
+  };
+
+  const cookie = [
+    `bid=kduJnqvNBFc`,
+    `ck=DWwN`,
+    `dbcl2="218395312:UT9bF9dpAxQ"`,
+    `frodotk_db="2efc076d387bf7e58cf41647a973e7af"`,
+  ].join(';')
+
+  const oUrl = new URL(fullURL)
+
+  for (let key in rParams) {
+    oUrl.searchParams.set(key, rParams[key])
+  }
+
+
+  const req = await fetch(fullURL, {
+    headers: {
+      'user-agent': getUA(),
+      cookie: cookie
+    }
+  })
+
+  return req.json()
+}
+
+const getFrodoSign = (url: string, date: string, method: string = 'GET') => {
+  const urlParsed = new URL(url);
+  const urlPath = urlParsed.pathname;
+  const rawSign = [method.toUpperCase(), encodeURIComponent(urlPath), date].join('&');
+  const hmac = crypto.createHmac('sha1', 'bf7dddc7c9cfe6f7');
+  hmac.update(rawSign)
+  return hmac.digest('base64');
+}
+
+const USER_AGENTS = [
+  "api-client/1 com.douban.frodo/7.22.0.beta9(231) Android/23 product/Mate 40 vendor/HUAWEI model/Mate 40 brand/HUAWEI  rom/android  network/wifi  platform/AndroidPad",
+  "api-client/1 com.douban.frodo/7.18.0(230) Android/22 product/MI 9 vendor/Xiaomi model/MI 9 brand/Android  rom/miui6  network/wifi  platform/mobile nd/1",
+  "api-client/1 com.douban.frodo/7.1.0(205) Android/29 product/perseus vendor/Xiaomi model/Mi MIX 3  rom/miui6  network/wifi  platform/mobile nd/1",
+  "api-client/1 com.douban.frodo/7.3.0(207) Android/22 product/MI 9 vendor/Xiaomi model/MI 9 brand/Android  rom/miui6  network/wifi platform/mobile nd/1"
+]
+
+const getUA = (() => {
+  let i = -1
+  return () => {
+    i += 1
+    if (i > 3) i = 0
+    return USER_AGENTS[i]
+  }
+})()
