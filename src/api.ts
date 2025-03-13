@@ -1,12 +1,6 @@
 import dayjs from "dayjs"
 import crypto from 'crypto'
-import { ITopic, RawDoubanBook } from "./types.js"
-
-export enum TOOL {
-  SEARCH = 'search',
-  BROWSE = 'browse',
-  LIST_GROUP_TOPICS = 'list-group-topics'
-}
+import { ITopic, ITopicDetail, RawDoubanBook, TOOL } from "./types.js"
 
 const apiKey = '0ac44ae016490db2204ce0a042db2916'
 
@@ -49,13 +43,21 @@ async function searchByISBN (isbn: string) {
 }
 
 export async function getGroupTopics(params: {
-  group_id: string
+  id: string
 }) {
-  const res = await requestFrodoApi(`/group/${params.group_id}/topics`)
+  const res = await requestFrodoApi(`/group/${params.id}/topics`)
 
   const topics = (res.topics as ITopic[] || []).filter(_ => !_.is_ad)
 
   return topics
+}
+
+export async function getGroupTopicDetail(params: {
+  id: string
+}) {
+  const res: ITopicDetail = await requestFrodoApi(`/group/topic/${params.id}`)
+
+  return res
 }
 
 const FAKE_HEADERS = {
@@ -116,7 +118,7 @@ const requestFrodoApi = async (url: string) => {
   }
 
 
-  const req = await fetch(fullURL, {
+  const req = await fetch(oUrl.toString(), {
     headers: {
       'user-agent': getUA(),
       cookie: cookie

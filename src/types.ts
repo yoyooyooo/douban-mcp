@@ -13,6 +13,17 @@ export const ListGroupTopicsParamsSchema = z.object({
   id: z.string().optional()
 });
 
+export const GroupTopicParamsSchema = z.object({
+  id: z.string()
+});
+
+export enum TOOL {
+  SEARCH = 'search',
+  BROWSE = 'browse',
+  LIST_GROUP_TOPICS = 'list-group-topics',
+  GET_GROUP_TOPIC_DETAIL = 'get-group-topic-detail'
+}
+
 export interface RawDoubanBook {
   rating: {
     max: number
@@ -75,4 +86,13 @@ export interface ITopic {
   label: string;
   type: string;
   is_ad: boolean;
+}
+
+export interface ITopicDetail extends ITopic {
+  like_count: number
+  comments_count: number
+  collections_count: number
+  reshares_count: number
+  content: string
+  abstract: string
 }

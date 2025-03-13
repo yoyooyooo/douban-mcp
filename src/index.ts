@@ -8,11 +8,12 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import { BrowseParamsSchema, ListGroupTopicsParamsSchema, SearchParamsSchema } from "./types.js";
-import { getGroupTopics, searchBooks, TOOL } from "./api.js";
+import { BrowseParamsSchema, ListGroupTopicsParamsSchema, SearchParamsSchema, TOOL } from "./types.js";
+import { getGroupTopicDetail, getGroupTopics, searchBooks } from "./api.js";
 import json2md from 'json2md'
 import open from 'open'
 import dayjs from "dayjs";
+import TurndownService from "turndown";
 
 const server = new Server(
   {
@@ -72,6 +73,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             }
           },
         }
+      },
+      {
+        name: TOOL.GET_GROUP_TOPIC_DETAIL,
+        description: "get group topic detail",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              description: "The id of douban group topic",
+            }
+          },
+        },
+        required: ['id']
       }
     ]
   };
@@ -134,7 +149,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (name === TOOL.LIST_GROUP_TOPICS) {
       const validatedArgs = ListGroupTopicsParamsSchema.parse(args);
       const id = validatedArgs.id || '732764'
-      const topics = await getGroupTopics({ group_id: id })
+      const topics = await getGroupTopics({ id: id })
 
       const text = json2md({
         table: {
@@ -146,6 +161,32 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }))
         }
       })
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: text,
+          },
+        ],
+      }
+    }
+
+    if (name === TOOL.GET_GROUP_TOPIC_DETAIL) {
+      const validatedArgs = ListGroupTopicsParamsSchema.parse(args);
+      if (!validatedArgs.id) {
+        throw new McpError(ErrorCode.InvalidParams, "douban group topic id must be provided")
+      }
+
+      const topic = await getGroupTopicDetail({ id: validatedArgs.id })
+
+      if (!topic?.id) throw new McpError(ErrorCode.InvalidRequest, "request failed")
+      const tService = new TurndownService()
+      const text = `title: ${topic.title}
+tags: ${topic.topic_tags.map(_ => _.name).join('|')}
+content:
+${tService.turndown(topic.content)}
+`
 
       return {
         content: [
