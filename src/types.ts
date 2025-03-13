@@ -10,7 +10,7 @@ export const BrowseParamsSchema = z.object({
 });
 
 export const ListGroupTopicsParamsSchema = z.object({
-  id: z.string()
+  id: z.string().optional()
 });
 
 export interface RawDoubanBook {
