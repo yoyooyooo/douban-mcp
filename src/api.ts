@@ -111,6 +111,7 @@ const requestFrodoApi = async (url: string) => {
   const oUrl = new URL(fullURL)
 
   for (let key in rParams) {
+    // @ts-ignore
     oUrl.searchParams.set(key, rParams[key])
   }
 
