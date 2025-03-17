@@ -4,6 +4,7 @@ import { ITopic, ITopicDetail, RawDoubanBook, TOOL } from "./types.js"
 
 const apiKey = '0ac44ae016490db2204ce0a042db2916'
 
+// 书籍API
 export async function searchBooks(params: {
   q?: string
   isbn?: string
@@ -40,6 +41,43 @@ async function searchByISBN (isbn: string) {
     headers: FAKE_HEADERS
   })).json()
   return res?.id ? [parseDoubanBook(res)] : []
+}
+
+// 电影API
+export async function searchMovies(params: {
+  q: string
+}) {
+  const url = new URL('https://api.douban.com/v2/movie/search')
+  url.searchParams.set('q', params.q)
+  url.searchParams.set('apikey', apiKey)
+  const res: {
+    count: number
+    start: number
+    total: number
+    subjects: any[]
+  } = await (await fetch(url.toString(), {
+    headers: FAKE_HEADERS
+  })).json()
+
+  return res?.subjects ? res.subjects : []
+}
+
+export async function getMovieReviews(params: {
+  id: string
+}) {
+  const url = new URL(`https://api.douban.com/v2/movie/subject/${params.id}/reviews`)
+  url.searchParams.set('apikey', apiKey)
+  const res: {
+    count: number
+    start: number
+    total: number
+    subjects: any
+    reviews: any[]
+  } = await (await fetch(url.toString(), {
+    headers: FAKE_HEADERS
+  })).json()
+
+  return res?.reviews ? res.reviews : []
 }
 
 export async function getGroupTopics(params: {

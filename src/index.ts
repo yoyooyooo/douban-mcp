@@ -8,8 +8,8 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import { BrowseParamsSchema, ListGroupTopicsParamsSchema, SearchParamsSchema, TOOL } from "./types.js";
-import { getGroupTopicDetail, getGroupTopics, searchBooks } from "./api.js";
+import { BrowseParamsSchema, ListGroupTopicsParamsSchema, SearchMovieParamsSchema, SearchParamsSchema, TOOL } from "./types.js";
+import { getGroupTopicDetail, getGroupTopics, searchBooks, searchMovies } from "./api.js";
 import json2md from 'json2md'
 import open from 'open'
 import dayjs from "dayjs";
@@ -31,7 +31,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
-        name: TOOL.SEARCH,
+        name: TOOL.SEARCH_BOOK,
         description: "search books from douban, either by ISBN or by query",
         inputSchema: {
           type: "object",
@@ -45,6 +45,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: "Optional, The ISBN of the book",
             },
           },
+        },
+      },
+      {
+        name: TOOL.SEARCH_MOVIE,
+        description: "search movies from douban by query",
+        inputSchema: {
+          type: "object",
+          properties: {
+            q: {
+              type: "string",
+              description: "The search query",
+            }
+          },
+          required: ['q']
         },
       },
       {
@@ -96,7 +110,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
-    if (name === TOOL.SEARCH) {
+    if (name === TOOL.SEARCH_BOOK) {
       const validatedArgs = SearchParamsSchema.parse(args);
       if (!validatedArgs.isbn && !validatedArgs.q) {
         throw new McpError(ErrorCode.InvalidParams, "Either q or isbn must be provided")
@@ -111,7 +125,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             author: _.author.join('、'),
             publish_date: _.pubdate,
             isbn: _.isbn13,
-            rate: `${_.rating?.average || '0'} (${_.rating?.numRaters || 0}人)`
+            rating: `${_.rating?.average || '0'} (${_.rating?.numRaters || 0}人)`
+          }))
+        }
+      })
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: text
+          }
+        ]
+      }
+    }
+
+    if (name === TOOL.SEARCH_MOVIE) {
+      const validatedArgs = SearchMovieParamsSchema.parse(args);
+      if (!validatedArgs.q) {
+        throw new McpError(ErrorCode.InvalidParams, "q must be provided")
+      }
+
+      const movies = await searchMovies(validatedArgs)
+
+      const text = json2md({
+        table: {
+          headers: ['title', 'original_title', 'rating', 'wish_count', 'collect_count', 'do_count', 'id'],
+          rows: movies.map(_ => ({
+            id: _.id,
+            title: _.title,
+            original_title: _.original_title,
+            rating: `${_.rating?.average || '0'} (${_.ratings_count || 0}人)`,
+            wish_count: _.wish_count,
+            collect_count: _.collect_count,
+            do_count: _.do_count,
           }))
         }
       })

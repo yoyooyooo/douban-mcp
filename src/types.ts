@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+export const SearchMovieParamsSchema = z.object({
+  q: z.string(),
+});
+
 export const SearchParamsSchema = z.object({
   q: z.string().optional(),
   isbn: z.string().optional()
@@ -18,7 +22,8 @@ export const GroupTopicParamsSchema = z.object({
 });
 
 export enum TOOL {
-  SEARCH = 'search',
+  SEARCH_BOOK = 'search-book',
+  SEARCH_MOVIE = 'search-movie',
   BROWSE = 'browse',
   LIST_GROUP_TOPICS = 'list-group-topics',
   GET_GROUP_TOPIC_DETAIL = 'get-group-topic-detail'
