@@ -24,9 +24,10 @@ const server = new McpServer(
 // 搜索图书
 server.tool(
   TOOL.SEARCH_BOOK,
+  'search books from douban, either by ISBN or by query',
   {
-    q: z.string().optional(),
-    isbn: z.string().optional()
+    q: z.string().optional().describe('query string, e.g. "python"'),
+    isbn: z.string().optional().describe('ISBN number, e.g. "9787501524044"')
   },
   async (args) => {
     if (!args.isbn && !args.q) {
@@ -56,8 +57,9 @@ server.tool(
 // 搜索电影
 server.tool(
   TOOL.SEARCH_MOVIE,
+  'search movies from douban by query',
   {
-    q: z.string()
+    q: z.string().describe('query string, e.g. "python"')
   },
   async (args) => {
     if (!args.q) {
@@ -89,8 +91,9 @@ server.tool(
 // 浏览图书详情
 server.tool(
   TOOL.BROWSE,
+  "open default browser and browse douban book detail",
   {
-    id: z.string()
+    id: z.string().describe('douban book id, e.g. "1234567890"')
   },
   async (args) => {
     if (!args.id) {
@@ -111,10 +114,11 @@ server.tool(
 // 获取小组话题列表
 server.tool(
   TOOL.LIST_GROUP_TOPICS,
+  "list group topics",
   {
     id: z.string().optional().default('732764').describe('douban group id, default: 732764'),
-    tags: z.array(z.string()).optional(),
-    from_date: z.string().optional()
+    tags: z.array(z.string()).optional().describe('tags, e.g. ["python"]'),
+    from_date: z.string().optional().describe('from date, e.g. "2024-01-01"')
   },
   async (args) => {
     const id = args.id || '732764'
@@ -140,8 +144,9 @@ server.tool(
 // 获取小组话题详情
 server.tool(
   TOOL.GET_GROUP_TOPIC_DETAIL,
+  "get group topic detail",
   {
-    id: z.string()
+    id: z.string().describe('douban group topic id, e.g. "1234567890"')
   },
   async (args) => {
     if (!args.id) {
