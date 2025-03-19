@@ -1,32 +1,3 @@
-import { z } from "zod";
-
-export const SearchMovieParamsSchema = z.object({
-  q: z.string(),
-});
-
-export const SearchParamsSchema = z.object({
-  q: z.string().optional(),
-  isbn: z.string().optional()
-});
-
-export const BrowseParamsSchema = z.object({
-  id: z.string()
-});
-
-export const ListGroupTopicsParamsSchema = z.object({
-  id: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  from_date: z.string().optional()
-});
-
-export const GetGroupTopicDetailParamsSchema = z.object({
-  id: z.string()
-});
-
-export const GroupTopicParamsSchema = z.object({
-  id: z.string()
-});
-
 export enum TOOL {
   SEARCH_BOOK = 'search-book',
   SEARCH_MOVIE = 'search-movie',
