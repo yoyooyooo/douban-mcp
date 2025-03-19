@@ -1,5 +1,6 @@
 import dayjs from "dayjs"
 import crypto from 'crypto'
+import { URL } from 'url'
 import { ITopic, ITopicDetail, RawDoubanBook, TOOL } from "./types.js"
 
 const apiKey = '0ac44ae016490db2204ce0a042db2916'
@@ -110,7 +111,7 @@ export async function getGroupTopicDetail(params: {
 }
 
 const FAKE_HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'Accept': 'application/json',
     'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
     'accept-encoding': 'gzip, deflate, br, zstd',
     'Cache-Control': 'no-cache',
@@ -130,7 +131,7 @@ const FAKE_HEADERS = {
 
 const parseDoubanBook = (_: RawDoubanBook): RawDoubanBook => {
 
-  let pubdate = _.pubdate?.replace?.(/年|月/g, '-')?.replace?.(/日$/, '') || ''
+  let pubdate = (_.pubdate || '').replace(/年|月/g, '-').replace(/日$/, '')
   if (pubdate) {
     pubdate = dayjs(pubdate).format('YYYY/MM')
   }

@@ -36,14 +36,14 @@ server.tool(
     const books = await searchBooks(args)
     const text = json2md({
       table: {
-        headers: ['publish_date', 'title', 'author', 'rate' ,'id', 'isbn'],
+        headers: ['publish_date', 'title', 'author', 'rating' ,'id', 'isbn'],
         rows: books.map(_ => ({
-          id: _.id,
-          title: _.title,
-          author: _.author.join('、'),
+          id: _.id || '',
+          title: _.title || '',
+          author: (_.author || []).join('、'),
           publish_date: _.pubdate,
-          isbn: _.isbn13,
-          rating: `${_.rating?.average || '0'} (${_.rating?.numRaters || 0}人)`
+          isbn: _.isbn13 || '',
+          rating: `${_.rating?.average || 0} (${_.rating?.numRaters || 0}人)`
         }))
       }
     })
