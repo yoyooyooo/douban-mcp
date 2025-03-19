@@ -8,7 +8,7 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import { BrowseParamsSchema, ListGroupTopicsParamsSchema, SearchMovieParamsSchema, SearchParamsSchema, TOOL } from "./types.js";
+import { BrowseParamsSchema, GetGroupTopicDetailParamsSchema, ListGroupTopicsParamsSchema, SearchMovieParamsSchema, SearchParamsSchema, TOOL } from "./types.js";
 import { getGroupTopicDetail, getGroupTopics, searchBooks, searchMovies } from "./api.js";
 import json2md from 'json2md'
 import open from 'open'
@@ -84,6 +84,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             id: {
               type: "string",
               description: "Optional, The id of douban group, default 732764",
+            },
+            tags: {
+              type: "array",
+              description: "Optional, The tags of the topics",
+            },
+            from_date: {
+              type: "string",
+              description: "Optional, The from date of the topics, format: YYYY/MM/DD",
             }
           },
         }
@@ -220,7 +228,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (name === TOOL.GET_GROUP_TOPIC_DETAIL) {
-      const validatedArgs = ListGroupTopicsParamsSchema.parse(args);
+      const validatedArgs = GetGroupTopicDetailParamsSchema.parse(args);
       if (!validatedArgs.id) {
         throw new McpError(ErrorCode.InvalidParams, "douban group topic id must be provided")
       }

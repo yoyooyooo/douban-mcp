@@ -82,10 +82,21 @@ export async function getMovieReviews(params: {
 
 export async function getGroupTopics(params: {
   id: string
+  tags?: string[]
+  from_date?: string
 }) {
   const res = await requestFrodoApi(`/group/${params.id}/topics`)
 
-  const topics = (res.topics as ITopic[] || []).filter(_ => !_.is_ad)
+  let topics = (res.topics as ITopic[] || []).filter(_ => !_.is_ad)
+
+  if (params.tags) {
+    topics = topics.filter(_ => _.topic_tags.some(tag => params.tags?.includes(tag.name)))
+  }
+
+  if (params.from_date) {
+    topics = topics.filter(_ => dayjs(_.create_time).isAfter(dayjs(params.from_date)))
+  }
+
 
   return topics
 }

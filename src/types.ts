@@ -14,7 +14,13 @@ export const BrowseParamsSchema = z.object({
 });
 
 export const ListGroupTopicsParamsSchema = z.object({
-  id: z.string().optional()
+  id: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  from_date: z.string().optional()
+});
+
+export const GetGroupTopicDetailParamsSchema = z.object({
+  id: z.string()
 });
 
 export const GroupTopicParamsSchema = z.object({
