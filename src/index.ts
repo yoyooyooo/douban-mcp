@@ -126,10 +126,11 @@ server.tool(
 
     const text = json2md({
       table: {
-        headers: ['publish_date', 'title', 'id'],
+        headers: ['publish_date', 'tags', 'title', 'id'],
         rows: topics.map(_ => ({
           id: _.id,
-          title: `${_.topic_tags.map(_ => _.name + '|').join()}${_.title}`,
+          tags: _.topic_tags.map(_ => _.name).join('、'),
+          title: `[${_.title}](${_.url})`,
           publish_date: dayjs(_.create_time).format('YYYY/MM/DD'),
         }))
       }
