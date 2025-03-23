@@ -1,24 +1,96 @@
 # Douban MCP Server
 
-This MCP server provides functionality to search book from douban
+This MCP server provides functionality to search and interact with Douban content including books, movies, and group discussions.
 
-## Components
+## Features
 
-### Tools
+- **Search Books**: Search books by title keywords or ISBN
+- **Search Movies**: Search movies by title or keywords
+- **Get Movie Reviews**: Fetch reviews for a specific movie
+- **Browse Content**: Open book or movie pages in your default browser
+- **Group Topics**: List and filter topics from Douban groups
+- **Topic Details**: Get detailed content of specific group topics
 
-- **search**
-  - search book info from douban
-  - Input:
-    - `isbn` (string, optional): isbn of the book to fetch
-    - `q` (string, optional): search keyword of the book title to fetch
+## Tools
 
-  - Returns the book content array
+The server provides the following tools that can be called through MCP:
 
-### Resources
+### 1. Search Books
 
-This server does not provide any persistent resources. It's designed to fetch and transform web content on demand.
+```typescript
+// Tool name: search-book
+{
+  q: "Python",             // Optional: Search by keyword
+  isbn: "9787501524044"    // Optional: Search by ISBN
+}
+```
 
-## Getting started
+One of `q` or `isbn` must be provided.
+
+### 2. Search Movies
+
+```typescript
+// Tool name: search-movie
+{
+  q: "Inception"; // Required: Search by title or keyword
+}
+```
+
+### 3. Get Movie Reviews
+
+```typescript
+// Tool name: get-movie-reviews
+{
+  id: "1889243"; // Required: Douban movie ID
+}
+```
+
+### 4. Browse Content
+
+```typescript
+// Tool name: browse
+{
+  id: "1889243",           // Required: Douban item ID
+  type: "movie"            // Optional: "book" (default) or "movie"
+}
+```
+
+### 5. List Group Topics
+
+```typescript
+// Tool name: list-group-topics
+{
+  id: "732764",            // Optional: Douban group ID (default: 732764)
+  tags: ["python", "web"],  // Optional: Filter by tags
+  from_date: "2024-01-01"  // Optional: Filter by date (from this date onward)
+}
+```
+
+### 6. Get Group Topic Detail
+
+```typescript
+// Tool name: get-group-topic-detail
+{
+  id: "123456789"; // Required: Douban group topic ID
+}
+```
+
+## Response Format
+
+All tools return responses in the following format:
+
+```typescript
+{
+  content: [
+    {
+      type: "text",
+      text: "Response content in markdown format",
+    },
+  ];
+}
+```
+
+## Getting Started
 
 1. Clone the repository
 2. Install dependencies: `npm install`
@@ -32,7 +104,7 @@ To use the server, you can run it directly:
 npm start
 ```
 
-This will start the Fetch MCP Server running on stdio.
+This will start the Douban MCP Server running on stdio.
 
 ### Usage with Desktop App
 
@@ -43,24 +115,45 @@ To integrate this server with a desktop app, add the following to your app's ser
   "mcpServers": {
     "douban-mcp": {
       "command": "node",
-      "args": [
-        "{ABSOLUTE PATH TO FILE HERE}/dist/index.js"
-      ],
+      "args": ["{ABSOLUTE PATH TO FILE HERE}/dist/index.js"],
       "env": {
-        "COOKIE": "bid=;ck=;dbcl2=;frodotk_db=;" // get cookie value from website
+        "COOKIE": "bid=;ck=;dbcl2=;frodotk_db=;" // get cookie value from Douban website
       }
     }
   }
 }
 ```
 
-## Features
+## Configuration
 
-- Search book from douban
+You can configure various options through environment variables:
+
+```bash
+# API Configuration
+export COOKIE="bid=;ck=;dbcl2=;frodotk_db=;" # Your Douban cookie value for authenticated requests
+```
 
 ## Development
 
 - Run `npm run dev` to start the TypeScript compiler in watch mode
+- Run `npm test` to run tests
+
+## Douban API Integration
+
+This server uses several Douban APIs:
+
+1. **Book API** - Searches for books by keyword or ISBN
+2. **Movie API** - Searches for movies and retrieves reviews
+3. **Group API** - Accesses group topics and details
+
+## Error Handling
+
+All tools include comprehensive error handling that will provide clear error messages when issues occur, such as:
+
+- Invalid parameters
+- Not found errors
+- API request failures
+- Authentication issues
 
 ## License
 
