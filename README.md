@@ -1,5 +1,7 @@
 # Douban MCP Server
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 This MCP server provides functionality to search and interact with Douban content including books, movies, and group discussions.
 
 ## Features
@@ -114,8 +116,8 @@ To integrate this server with a desktop app, add the following to your app's ser
 {
   "mcpServers": {
     "douban-mcp": {
-      "command": "node",
-      "args": ["{ABSOLUTE PATH TO FILE HERE}/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "mcp-douban-server"],
       "env": {
         "COOKIE": "bid=;ck=;dbcl2=;frodotk_db=;" // get cookie value from Douban website
       }
@@ -154,6 +156,18 @@ All tools include comprehensive error handling that will provide clear error mes
 - Not found errors
 - API request failures
 - Authentication issues
+
+## Docker Deployment
+
+You can build and run the container using the provided Dockerfile:
+
+```bash
+# Build Docker image
+docker build -t douban-mcp .
+
+# Run container
+docker run -it douban-mcp
+```
 
 ## License
 
