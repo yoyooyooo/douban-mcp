@@ -1,7 +1,7 @@
 import dayjs from "dayjs"
 import crypto from 'crypto'
 import { URL } from 'url'
-import { ITopic, ITopicDetail, RawDoubanBook, TOOL } from "./types.js"
+import type { Douban } from "./types.ts"
 
 const apiKey = '0ac44ae016490db2204ce0a042db2916'
 
@@ -27,7 +27,7 @@ async function searchByKeyword (q: string) {
     count: number
     start: number
     total: number
-    books: RawDoubanBook[]
+    books: Douban.Book[]
   } = await (await fetch(url.toString(), {
     headers: FAKE_HEADERS
   })).json()
@@ -38,10 +38,23 @@ async function searchByKeyword (q: string) {
 async function searchByISBN (isbn: string) {
   const url = new URL(`https://api.douban.com/v2/book/isbn/${isbn}`)
   url.searchParams.set('apikey', apiKey)
-  const res: RawDoubanBook = await (await fetch(url.toString(), {
+  const res: Douban.Book = await (await fetch(url.toString(), {
     headers: FAKE_HEADERS
   })).json()
   return res?.id ? [parseDoubanBook(res)] : []
+}
+
+// 获取图书长评列表
+export async function getBookReviews(params: {
+  id: string
+}) {
+  const res: {
+    count: number
+    start: number
+    total: number
+    reviews: Douban.BookReview[]
+  } = await requestFrodoApi(`/book/${params.id}/reviews`)
+  return res
 }
 
 // 电影API
@@ -55,7 +68,7 @@ export async function searchMovies(params: {
     count: number
     start: number
     total: number
-    subjects: any[]
+    subjects: Douban.Movie[]
   } = await (await fetch(url.toString(), {
     headers: FAKE_HEADERS
   })).json()
@@ -63,6 +76,7 @@ export async function searchMovies(params: {
   return res?.subjects ? res.subjects : []
 }
 
+// 获取电影长评列表
 export async function getMovieReviews(params: {
   id: string
 }) {
@@ -72,8 +86,8 @@ export async function getMovieReviews(params: {
     count: number
     start: number
     total: number
-    subjects: any
-    reviews: any[]
+    subject: Douban.Movie
+    reviews: Douban.MovieReview[]
   } = await (await fetch(url.toString(), {
     headers: FAKE_HEADERS
   })).json()
@@ -81,6 +95,7 @@ export async function getMovieReviews(params: {
   return res?.reviews ? res.reviews : []
 }
 
+// 获取小组话题列表
 export async function getGroupTopics(params: {
   id: string
   tags?: string[]
@@ -88,7 +103,7 @@ export async function getGroupTopics(params: {
 }) {
   const res = await requestFrodoApi(`/group/${params.id}/topics`)
 
-  let topics = (res.topics as ITopic[] || []).filter(_ => !_.is_ad)
+  let topics = (res.topics as Douban.Topic[] || []).filter(_ => !_.is_ad)
 
   if (params.tags) {
     topics = topics.filter(_ => _.topic_tags.some(tag => params.tags?.includes(tag.name)))
@@ -102,10 +117,11 @@ export async function getGroupTopics(params: {
   return topics
 }
 
+// 获取小组话题详情
 export async function getGroupTopicDetail(params: {
   id: string
 }) {
-  const res: ITopicDetail = await requestFrodoApi(`/group/topic/${params.id}`)
+  const res: Douban.TopicDetail = await requestFrodoApi(`/group/topic/${params.id}`)
 
   return res
 }
@@ -129,7 +145,7 @@ const FAKE_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0'
 }
 
-const parseDoubanBook = (_: RawDoubanBook): RawDoubanBook => {
+const parseDoubanBook = (_: Douban.Book): Douban.Book => {
 
   let pubdate = (_.pubdate || '').replace(/年|月/g, '-').replace(/日$/, '')
   if (pubdate) {

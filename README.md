@@ -14,25 +14,11 @@ This MCP server provides functionality to search book from douban
 
   - Returns the book content array
 
-### Resources
-
-This server does not provide any persistent resources. It's designed to fetch and transform web content on demand.
-
 ## Getting started
 
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Build the server: `npm run build`
-
-### Usage
-
-To use the server, you can run it directly:
-
-```bash
-npm start
-```
-
-This will start the Fetch MCP Server running on stdio.
 
 ### Usage with Desktop App
 
@@ -58,9 +44,8 @@ To integrate this server with a desktop app, add the following to your app's ser
 
 - Search book from douban
 
-## Development
-
-- Run `npm run dev` to start the TypeScript compiler in watch mode
+## DOCS
+- [douban api doc](https://www.doubanapi.com/)
 
 ## License
 

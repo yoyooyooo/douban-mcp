@@ -7,7 +7,7 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { TOOL } from "./types.js";
-import { getGroupTopicDetail, getGroupTopics, searchBooks, searchMovies } from "./api.js";
+import { getBookReviews, getGroupTopicDetail, getGroupTopics, getMovieReviews, searchBooks, searchMovies } from "./api.js";
 import json2md from 'json2md'
 import open from 'open'
 import dayjs from "dayjs";
@@ -54,6 +54,37 @@ server.tool(
   }
 );
 
+// 获取图书长评列表
+server.tool(
+  TOOL.LIST_BOOK_REVIEWS,
+  "list book reviews",
+  {
+    id: z.string().describe('douban book id, e.g. "1234567890"')
+  },
+  async (args) => {
+    if (!args.id) {
+      throw new McpError(ErrorCode.InvalidParams, "douban book id must be provided")
+    }
+
+    const reviews = await getBookReviews({ id: args.id })
+    const text = json2md({
+      table: {
+        headers: ['title', 'rating', 'summary', 'id'],
+        rows: reviews.reviews.map(_ => ({
+          id: _.id,
+          title: _.title,
+          rating: `${_.rating?.value || 0} (${_.rating?.count || 0}人)`,
+          summary: _.abstract
+        }))
+      }
+    })
+
+    return {
+      content: [{ type: 'text', text }]
+    }
+  }
+)
+
 // 搜索电影
 server.tool(
   TOOL.SEARCH_MOVIE,
@@ -69,15 +100,12 @@ server.tool(
     const movies = await searchMovies(args)
     const text = json2md({
       table: {
-        headers: ['title', 'original_title', 'rating', 'wish_count', 'collect_count', 'do_count', 'id'],
+        headers: ['title', 'original_title', 'rating', 'id'],
         rows: movies.map(_ => ({
           id: _.id,
           title: _.title,
           original_title: _.original_title,
-          rating: `${_.rating?.average || '0'} (${_.ratings_count || 0}人)`,
-          wish_count: _.wish_count,
-          collect_count: _.collect_count,
-          do_count: _.do_count,
+          rating: `${_.rating?.average || '0'} (${_.rating?.numRaters || 0}人)`,
         }))
       }
     })
@@ -88,6 +116,36 @@ server.tool(
   }
 );
 
+// 获取电影长评列表
+server.tool(
+  TOOL.LIST_MOVIE_REVIEWS,
+  "list movie reviews",
+  {
+    id: z.string().describe('douban movie id, e.g. "1234567890"')
+  },
+  async (args) => {
+    if (!args.id) {
+      throw new McpError(ErrorCode.InvalidParams, "douban movie id must be provided")
+    }
+
+    const reviews = await getMovieReviews({ id: args.id })
+    const text = json2md({
+      table: {
+        headers: ['title', 'rating', 'summary', 'id'],
+        rows: reviews.map(_ => ({
+          id: _.id,
+          title: _.title,
+          rating: `${_.rating?.average || 0} (${_.rating?.numRaters || 0}人)`,
+          summary: _.summary
+        }))
+      }
+    })
+
+    return {
+      content: [{ type: "text", text }]
+    }
+  }
+)
 // 浏览图书详情
 server.tool(
   TOOL.BROWSE,
@@ -116,7 +174,7 @@ server.tool(
   TOOL.LIST_GROUP_TOPICS,
   "list group topics",
   {
-    id: z.string().optional().default('732764').describe('douban group id, default: 732764'),
+    id: z.string().optional().describe('douban group id'),
     tags: z.array(z.string()).optional().describe('tags, e.g. ["python"]'),
     from_date: z.string().optional().describe('from date, e.g. "2024-01-01"')
   },
