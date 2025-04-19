@@ -106,7 +106,7 @@ server.tool(
           title: _.title,
           subtitle: _.card_subtitle,
           publish_date: _.year,
-          rating: `${_.rating?.average || '0'} (${_.rating?.numRaters || 0}人)`,
+          rating: `${_.rating?.value || '0'} (${_.rating?.count || 0}人)`,
         }))
       }
     })
@@ -136,7 +136,7 @@ server.tool(
         rows: reviews.map(_ => ({
           id: _.id,
           title: _.title,
-          rating: `${_.rating?.average || 0} (${_.rating?.numRaters || 0}人)`,
+          rating: `${_.rating?.value || 0} (有用：${_.useful_count || 0}人)`,
           summary: _.abstract
         }))
       }
