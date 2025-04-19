@@ -61,37 +61,15 @@ export async function getBookReviews(params: {
 export async function searchMovies(params: {
   q: string
 }) {
-  const url = new URL('https://api.douban.com/v2/movie/search')
-  url.searchParams.set('q', params.q)
-  url.searchParams.set('apikey', apiKey)
-  const res: {
-    count: number
-    start: number
-    total: number
-    subjects: Douban.Movie[]
-  } = await (await fetch(url.toString(), {
-    headers: FAKE_HEADERS
-  })).json()
-
-  return res?.subjects ? res.subjects : []
+  const res = await requestFrodoApi(`/search/movie?q=${params.q}`)
+  return res?.items ? res.items.map(_ => _.target) : [];
 }
 
 // 获取电影长评列表
 export async function getMovieReviews(params: {
   id: string
 }) {
-  const url = new URL(`https://api.douban.com/v2/movie/subject/${params.id}/reviews`)
-  url.searchParams.set('apikey', apiKey)
-  const res: {
-    count: number
-    start: number
-    total: number
-    subject: Douban.Movie
-    reviews: Douban.MovieReview[]
-  } = await (await fetch(url.toString(), {
-    headers: FAKE_HEADERS
-  })).json()
-
+  const res = await requestFrodoApi(`/movie/${params.id}/reviews`);
   return res?.reviews ? res.reviews : []
 }
 

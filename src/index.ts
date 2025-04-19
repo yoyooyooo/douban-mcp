@@ -17,7 +17,7 @@ import { z } from "zod";
 const server = new McpServer(
   {
     name: "L-Chris/douban-mcp",
-    version: "0.1.0",
+    version: "0.2.0",
   }
 );
 
@@ -100,11 +100,12 @@ server.tool(
     const movies = await searchMovies(args)
     const text = json2md({
       table: {
-        headers: ['title', 'original_title', 'rating', 'id'],
+        headers: ['title', 'subtitle', 'publish_date', 'rating', 'id'],
         rows: movies.map(_ => ({
           id: _.id,
           title: _.title,
-          original_title: _.original_title,
+          subtitle: _.card_subtitle,
+          publish_date: _.year,
           rating: `${_.rating?.average || '0'} (${_.rating?.numRaters || 0}人)`,
         }))
       }
@@ -136,7 +137,7 @@ server.tool(
           id: _.id,
           title: _.title,
           rating: `${_.rating?.average || 0} (${_.rating?.numRaters || 0}人)`,
-          summary: _.summary
+          summary: _.abstract
         }))
       }
     })
