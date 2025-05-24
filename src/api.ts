@@ -57,7 +57,7 @@ export async function getBookReviews(params: {
   return res
 }
 
-// 电影API
+// 搜索电影或电视剧API
 export async function searchMovies(params: {
   q: string
 }) {
@@ -70,6 +70,14 @@ export async function getMovieReviews(params: {
   id: string
 }) {
   const res = await requestFrodoApi(`/movie/${params.id}/reviews`);
+  return res?.reviews ? res.reviews : []
+}
+
+// 获取电视剧长评列表
+export async function getTVReviews(params: {
+  id: string
+}) {
+  const res = await requestFrodoApi(`/tv/${params.id}/reviews`);
   return res?.reviews ? res.reviews : []
 }
 

@@ -1,71 +1,71 @@
-# Douban MCP Server
+# 豆瓣 MCP 服务器
 
 [English](README.md) | [中文](README.zh-CN.md)
 
-This MCP server provides functionality to search and interact with Douban (a Chinese social networking service) content including books, movies, and group discussions.
+这个 MCP 服务器提供了与豆瓣内容交互的功能，包括图书、电影和小组讨论等。
 
-## Features
+## 功能特性
 
-- Search books by title keywords or ISBN
-- View book reviews
-- Search movies by title
-- View movie reviews
-- Browse book details in default browser
-- List group topics with filtering options
-- View group topic details
+- 通过标题关键词或 ISBN 搜索图书
+- 查看图书评论
+- 通过标题搜索电影
+- 查看电影评论
+- 在默认浏览器中浏览图书详情
+- 列出小组话题，支持筛选选项
+- 查看小组话题详情
 
-## Components
+## 组件
 
-### Tools
+### 工具
 
 - **search-book**
-  - Search book info from Douban
-  - Input:
-    - `isbn` (string, optional): ISBN of the book to fetch
-    - `q` (string, optional): Search keyword of the book title
+  - 从豆瓣搜索图书信息
+  - 输入参数:
+    - `isbn` (字符串, 可选): 图书的 ISBN 编号
+    - `q` (字符串, 可选): 图书标题的搜索关键词
 
 - **list-book-reviews**
-  - Get book reviews from Douban
-  - Input:
-    - `id` (string): Douban book ID
+  - 获取豆瓣图书评论
+  - 输入参数:
+    - `id` (字符串): 豆瓣图书 ID
 
 - **search-movie**
-  - Search movie info from Douban
-  - Input:
-    - `q` (string): Search keyword of the movie title
+  - 从豆瓣搜索电影信息
+  - 输入参数:
+    - `q` (字符串): 电影标题的搜索关键词
 
 - **list-movie-reviews**
-  - Get movie reviews from Douban
-  - Input:
-    - `id` (string): Douban movie ID
+  - 获取豆瓣电影评论
+  - 输入参数:
+    - `id` (字符串): 豆瓣电影 ID
 
 - **browse**
-  - Open book detail page in default browser
-  - Input:
-    - `id` (string): Douban book ID
+  - 在默认浏览器中打开图书详情页
+  - 输入参数:
+    - `id` (字符串): 豆瓣图书 ID
 
 - **list-group-topics**
-  - List topics from Douban groups
-  - Input:
-    - `id` (string, optional): Douban group ID (defaults to '732764')
-    - `tags` (string[], optional): Filter topics by tags
-    - `from_date` (string, optional): Filter topics by date (format: "YYYY-MM-DD")
+  - 列出豆瓣小组话题
+  - 输入参数:
+    - `id` (字符串, 可选): 豆瓣小组 ID (默认为 '732764')
+    - `tags` (字符串数组, 可选): 按标签筛选话题
+    - `from_date` (字符串, 可选): 按日期筛选话题 (格式: "YYYY-MM-DD")
 
 - **get-group-topic-detail**
-  - Get details of a specific topic
-  - Input:
-    - `id` (string): Douban topic ID
+  - 获取特定话题的详情
+  - 输入参数:
+    - `id` (字符串): 豆瓣话题 ID
 
-## Getting started
+## 开始使用
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Build the server: `npm run build`
-4. Start the server: `npm start`
+1. 克隆仓库
+2. 安装依赖: `npm install`
+3. 构建服务器: `npm run build`
+4. 启动服务器: `npm start`
 
-### Usage with Desktop App
+### 与桌面应用集成
 
-To integrate this server with a desktop app, add the following to your app's server configuration:
+要将此服务器与桌面应用集成，请将以下内容添加到应用的服务器配置中，部分API需要用到COOKIE，请自行获取。:
 
 ```json
 {
@@ -73,35 +73,36 @@ To integrate this server with a desktop app, add the following to your app's ser
     "douban-mcp": {
       "command": "node",
       "args": [
-        "{ABSOLUTE PATH TO FILE HERE}/dist/index.js"
+        "{文件的绝对路径}/dist/index.js"
       ],
       "env": {
-        "COOKIE": "bid=;ck=;dbcl2=;frodotk_db=;" // get cookie value from website
+        "COOKIE": "bid=;ck=;dbcl2=;frodotk_db=;" // 从网站获取 cookie 值
       }
     }
   }
 }
 ```
 
-## Development
+## 开发
 
-- Build: `npm run build`
-- Watch mode: `npm run dev`
-- Start: `npm start`
-- Test: `npm test`
+- 构建: `npm run build`
+- 监视模式: `npm run dev`
+- 启动: `npm start`
+- 测试: `npm test`
 
-## Dependencies
+## 依赖项
 
 - [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/sdk): MCP SDK
-- [dayjs](https://day.js.org/): Date library
-- [json2md](https://github.com/IonicaBizau/json2md): JSON to Markdown converter
-- [turndown](https://github.com/domchristie/turndown): HTML to Markdown converter
-- [zod](https://github.com/colinhacks/zod): TypeScript-first schema validation
+- [dayjs](https://day.js.org/): 日期库
+- [json2md](https://github.com/IonicaBizau/json2md): JSON 转 Markdown 转换器
+- [turndown](https://github.com/domchristie/turndown): HTML 转 Markdown 转换器
+- [zod](https://github.com/colinhacks/zod): TypeScript 优先的模式验证
 
-## Resources
+## 资源
 
-- [Douban API Documentation](https://www.doubanapi.com/)
+- [豆瓣 API 文档](https://www.doubanapi.com/)
+- [豆瓣 API 文档](https://goddlts.github.io/douban-api-docs/)
 
-## License
+## 许可证
 
-This project is licensed under the MIT License.
+本项目采用 MIT 许可证。

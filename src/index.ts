@@ -7,7 +7,7 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import { TOOL } from "./types.js";
-import { getBookReviews, getGroupTopicDetail, getGroupTopics, getMovieReviews, searchBooks, searchMovies } from "./api.js";
+import { getBookReviews, getGroupTopicDetail, getGroupTopics, getMovieReviews, getTVReviews, searchBooks, searchMovies } from "./api.js";
 import json2md from 'json2md'
 import open from 'open'
 import dayjs from "dayjs";
@@ -85,10 +85,10 @@ server.tool(
   }
 )
 
-// 搜索电影
+// 搜索电影或电视剧
 server.tool(
   TOOL.SEARCH_MOVIE,
-  'search movies from douban by query',
+  'search movies or tvs from douban by query',
   {
     q: z.string().describe('query string, e.g. "python"')
   },
@@ -147,6 +147,38 @@ server.tool(
     }
   }
 )
+
+// 获取电视剧长评列表
+server.tool(
+  'list-tv-reviews',
+  "list tv reviews",
+  {
+    id: z.string().describe('douban tv id, e.g. "1234567890"')
+  },
+  async (args) => {
+    if (!args.id) {
+      throw new McpError(ErrorCode.InvalidParams, "douban tv id must be provided")
+    }
+
+    const reviews = await getTVReviews({ id: args.id })
+    const text = json2md({
+      table: {
+        headers: ['title', 'rating', 'summary', 'id'],
+        rows: reviews.map(_ => ({
+          id: _.id,
+          title: _.title,
+          rating: `${_.rating?.value || 0} (有用：${_.useful_count || 0}人)`,
+          summary: _.abstract
+        }))
+      }
+    })
+
+    return {
+      content: [{ type: "text", text }]
+    }
+  }
+)
+
 // 浏览图书详情
 server.tool(
   TOOL.BROWSE,
